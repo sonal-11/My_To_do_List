@@ -29,7 +29,8 @@ function App() {
   
 
   useEffect(() => {
-    db.collection("users")
+    if(user){
+      db.collection(user?.email)
       .orderBy("timestamp", "desc")
       .onSnapshot((snapshot) => {
         setTodos(
@@ -40,7 +41,8 @@ function App() {
           }))
         );
       });
-  }, []);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (localStorage.getItem("users") !== null) {
@@ -74,7 +76,7 @@ function App() {
   const addTodos = (event) => {
     event.preventDefault();
     // setTodos([...todos, input]);
-    db.collection("users")
+    db.collection(user.email)
       .add({
         todo: input,
         status: false,
@@ -133,13 +135,15 @@ function App() {
       setPassword("");
     };
 
-    const handleExitRoom = () => {
+   /* const handleExitRoom = () => {
       localStorage.removeItem("users");
-      setUser({ isRoom: false, key: "", password: "", room_name: "" });
+      // localStorage.setItem("email",email);
+      setUser({ email:"" });
       setTodos([""]);
-    };
+    };*/
   
     const handleSignOut = () => {
+      localStorage.removeItem("user");
       auth.signOut();
     };
 
@@ -153,9 +157,6 @@ function App() {
         <div className="App__input">
           <form>
             <p>+</p>
-            <button onClick={handleExitRoom} title="Exit">
-              <FontAwesomeIcon icon={faSignOutAlt} />
-            </button>
             <input
               type="text"
               placeholder="Create a new todo..."
@@ -190,9 +191,9 @@ function App() {
                           type="checkbox"
                           checked={todo.status}
                           onChange={(e) => {
-                            db.collection("users")
-                             .doc(todo.id)
-                             .update({ status: e.target.checked });
+                            db.collection(user.email)
+                              .doc(todo.id)
+                              .update({ status: e.target.checked });
                           }}
                         />
                       </div>
@@ -215,7 +216,7 @@ function App() {
                       </button>
                       <button
                         onClick={() => {
-                          db.collection("users").doc(todo.id).delete();
+                          db.collection(user.email).doc(todo.id).delete();
                           // setTodos(todos.filter((itm) => todo.id !== itm.id));
                         }}
                       >
@@ -232,7 +233,7 @@ function App() {
                         ></input>
                         <button
                           onClick={() => {
-                            db.collection("users").doc(todo.id).update({
+                            db.collection(user.email).doc(todo.id).update({
                               todo: editInput,
                             });
                             // setTodos(
@@ -316,7 +317,7 @@ function App() {
               if (confirmBox === true) {
                 todos.map((todo) => {
                   if (todo.status === true) {
-                    db.collection("users").doc(todo.id).delete();
+                    db.collection(user.email).doc(todo.id).delete();
                     // setTodos(todos.filter((itm) => todo.id !== itm.id));
                   }
                   return ;
